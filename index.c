@@ -16,39 +16,39 @@ FILE *arquivo;
 
 void cadastrarProduto() {
     produto produto;
-
+	//
     arquivo = fopen(ARQUIVO_PRODUTOS, "a+");
-
+	//
     if (arquivo == NULL) {
         printf("\n Erro ao abrir o banco de dados.");
         return;
     }
-
+	//
     printf("\n Digite o nome do produto: ");
     fflush(stdin); 
-    scanf(" %[^\n]s", produto.nomeProduto); // Limitar entrada para evitar overflow
-
+    scanf(" %[^\n]s", produto.nomeProduto); 
+	//
     printf("\n Digite a quantidade: ");
     scanf("%d", &produto.qtdProduto);
-
+	//
     printf("\n Digite a data de validade (YYYY-MM-DD): ");
-    scanf("%s", produto.dataValidade); // Nï¿½o precisa usar ï¿½ndice de tamanho
-
+    scanf("%s", produto.dataValidade); 
+	//
     printf("\n Digite a quantidade de vendas por dia: ");
     scanf("%d", &produto.vendasPorDia);
-
+	//
     fwrite(&produto, sizeof(produto), 1, arquivo);
     printf("\n Produto cadastrado com sucesso.\n");
-
+	//
     fclose(arquivo);
 }
 
 void listarProduto() {
     produto produto;
-    FILE *listarArquivo = fopen(ARQUIVO_PRODUTOS, "r"); // Abre o arquivo em modo de leitura
+    FILE *listarArquivo = fopen(ARQUIVO_PRODUTOS, "r"); 
 
     if (listarArquivo == NULL) {
-        printf("Nï¿½o existem produtos cadastrados.\n");
+        printf("Não existem produtos cadastrados.\n");
         return;
     }
 
@@ -67,35 +67,35 @@ int calcularDiasRestantes(char* dataValidade) {
     struct tm validade = {0};
     time_t t = time(NULL);
     struct tm *dataAtual = localtime(&t);
-
+	//
     sscanf(dataValidade, "%d-%d-%d", &validade.tm_year, &validade.tm_mon, &validade.tm_mday);
-    validade.tm_year -= 1900; // Ajusta o ano
-    validade.tm_mon -= 1; // Ajusta o mï¿½s
-
+    validade.tm_year -= 1900; 
+    validade.tm_mon -= 1; 
+	//
     time_t tempoValidade = mktime(&validade);
     double diferencaSegundos = difftime(tempoValidade, mktime(dataAtual));
-
-    return diferencaSegundos / (60 * 60 * 24); // Converte segundos para dias
+	//
+    return diferencaSegundos / (60 * 60 * 24); 
 }
 
 void produtoProximoVencimento() {
     produto produto;
     FILE *listarArquivo = fopen(ARQUIVO_PRODUTOS, "r");
-
+	//	
     if (listarArquivo == NULL) {
-        printf("Nï¿½o existem produtos cadastrados.\n");
+        printf("Não existem produtos cadastrados.\n");
         return;
-    }
-
-    printf("\n Produtos prï¿½ximos do vencimento:\n");
+    }   	
+	//
+    printf("\n Produtos próximos do vencimento:\n");
     while (fread(&produto, sizeof(produto), 1, listarArquivo)) {
         int diasRestantes = calcularDiasRestantes(produto.dataValidade);
-        if (diasRestantes <= 7 && diasRestantes >= 0) {
+        if (diasRestantes <= 7 && diasRestantes >= 0) {        	
             printf("\n Nome: %s", produto.nomeProduto);
             printf("\n Quantidade: %d", produto.qtdProduto);
             printf("\n Data de Validade: %s", produto.dataValidade);
             printf("\n Vendas por Dia: %d", produto.vendasPorDia);
-            printf("\n Dias restantes: %d\n", diasRestantes);
+            printf("\n Dias restantes: %d \n", diasRestantes);            
         }
     }
 
@@ -107,7 +107,7 @@ int main() {
 	//
     int opcao = 100;
 	//
-    // Cria o arquivo, caso ele nï¿½o exista.
+    // Cria o arquivo, caso ele não exista.
     arquivo = fopen(ARQUIVO_PRODUTOS, "w");
     //
     if (arquivo == NULL) {
@@ -117,12 +117,13 @@ int main() {
     fclose(arquivo);
 	//
     while (opcao != 0) {
+    	printf("\n --------------------------------------------------");
         printf("\nMenu:\n");
         printf("1 - Cadastrar Produto \n");
         printf("2 - Listar Produtos \n");
-        printf("3 - Verificar Produtos Prï¿½ximos do Vencimento \n");
-        printf("0 - Sair \n");
-        printf("Escolha uma opï¿½ï¿½o: ");
+        printf("3 - Verificar Produtos Próximos do Vencimento \n");
+        printf("0 - Sair \n");        
+        printf(" -------------------------------------------------- \n");
         scanf("%d", &opcao);
 		//
         switch (opcao) {
@@ -139,7 +140,7 @@ int main() {
                 printf("Saindo do sistema.\n");
                 break;
             default:
-                printf("Opï¿½ï¿½o invï¿½lida.\n");
+                printf("Opção inválida.\n");
         }
     }
 
