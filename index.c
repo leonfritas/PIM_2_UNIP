@@ -4,6 +4,7 @@
 #include<time.h>
 
 #define ARQUIVO_PRODUTOS "dbProduto.txt"
+#define ARQUIVO_DESTINOS "dbDestino.txt"
 
 typedef struct Produto {
     char nomeProduto[50];
@@ -12,7 +13,13 @@ typedef struct Produto {
     int vendasPorDia;
 } produto;
 
+typedef struct Destino {
+    char nomeDestino[50];
+    int qtdProduto;
+} destino;
+
 FILE *arquivo;
+FILE *arquivoDestino;
 
 void cadastrarProduto() {
     produto produto;
@@ -43,24 +50,79 @@ void cadastrarProduto() {
     fclose(arquivo);
 }
 
+void cadastrarDestino() {
+    destino destino;
+	//
+    arquivoDestino = fopen(ARQUIVO_DESTINOS, "a+");
+	//
+    if (arquivoDestino == NULL) {
+        printf("\n Erro ao abrir o banco de dados.");
+        return;
+    }
+	//
+    printf("\n Digite o nome do destino: ");
+    fflush(stdin); 
+    scanf(" %[^\n]s", destino.nomeDestino); 
+	//
+	destino.qtdProduto = 0;
+	//
+	fwrite(&destino, sizeof(destino), 1, arquivoDestino);
+    printf("\n Produto cadastrado com sucesso.\n");
+	//
+    fclose(arquivoDestino);
+}
+
 void listarProduto() {
     produto produto;
+    //
+    int produtoExiste = 0;
+    //
     FILE *listarArquivo = fopen(ARQUIVO_PRODUTOS, "r"); 
-
+	//
     if (listarArquivo == NULL) {
         printf("Não existem produtos cadastrados.\n");
         return;
     }
-
+	//
     printf("\n Produtos cadastrados:\n");
     while (fread(&produto, sizeof(produto), 1, listarArquivo)) {
         printf("\n Nome: %s", produto.nomeProduto);
         printf("\n Quantidade: %d", produto.qtdProduto);
         printf("\n Data de Validade: %s", produto.dataValidade);
         printf("\n Vendas por Dia: %d\n", produto.vendasPorDia);
+        produtoExiste = 1;
     }
-
+	//
+	if (produtoExiste == 0){
+    	printf("Não existem produtos próximos do vencimento.\n");	
+	}
+	//
     fclose(listarArquivo);
+}
+
+void listarDestino() {
+    destino destino;
+    //
+    int destinoExiste = 0;
+    //
+    FILE *listaDestino = fopen(ARQUIVO_DESTINOS, "r"); 
+	//
+    if (listaDestino == NULL) {
+        printf("Não existem destinos cadastrados.\n");
+        return;
+    }
+	//
+    printf("\n Produtos cadastrados:\n");
+    while (fread(&destino, sizeof(destino), 1, listaDestino)) {
+        printf("\n Nome: %s", destino.nomeDestino);
+        printf("\n Quantidade de produtos para doação: %d", destino.qtdProduto);
+        destinoExiste = 1;
+    }
+	//
+	if (destinoExiste == 0){
+    	printf("Não existem dados cadastrados.\n");	
+	}
+    fclose(listaDestino);
 }
 
 int calcularDiasRestantes(char* dataValidade) {
@@ -81,13 +143,11 @@ int calcularDiasRestantes(char* dataValidade) {
 void produtoProximoVencimento() {
     produto produto;
     FILE *listarArquivo = fopen(ARQUIVO_PRODUTOS, "r");
-	//	
-    if (listarArquivo == NULL) {
-        printf("Não existem produtos cadastrados.\n");
-        return;
-    }   	
+    //
+    int produtoExiste = 0;	 	
 	//
     printf("\n Produtos próximos do vencimento:\n");
+    //
     while (fread(&produto, sizeof(produto), 1, listarArquivo)) {
         int diasRestantes = calcularDiasRestantes(produto.dataValidade);
         if (diasRestantes <= 7 && diasRestantes >= 0) {        	
@@ -95,10 +155,15 @@ void produtoProximoVencimento() {
             printf("\n Quantidade: %d", produto.qtdProduto);
             printf("\n Data de Validade: %s", produto.dataValidade);
             printf("\n Vendas por Dia: %d", produto.vendasPorDia);
-            printf("\n Dias restantes: %d \n", diasRestantes);            
+            printf("\n Dias restantes: %d \n", diasRestantes); 
+			produtoExiste = 1;           
         }
     }
-
+    //
+    if (produtoExiste == 0){
+    	printf("Não existem produtos próximos do vencimento.\n");	
+	}
+	//
     fclose(listarArquivo);
 }
 
@@ -111,10 +176,20 @@ int main() {
     arquivo = fopen(ARQUIVO_PRODUTOS, "w");
     //
     if (arquivo == NULL) {
-        printf("Erro ao criar banco de dados.");
+        printf("Erro ao criar banco de dados: Produto.");
         return 0;
     }
+    
+    // Cria o arquivo, caso ele não exista.
+    arquivoDestino = fopen(ARQUIVO_DESTINOS, "w");
+    //
+    if (arquivoDestino == NULL) {
+        printf("Erro ao criar banco de dados: Destino.");
+        return 0;
+    }
+    
     fclose(arquivo);
+    fclose(arquivoDestino);
 	//
     while (opcao != 0) {
     	printf("\n --------------------------------------------------");
@@ -122,6 +197,8 @@ int main() {
         printf("1 - Cadastrar Produto \n");
         printf("2 - Listar Produtos \n");
         printf("3 - Verificar Produtos Próximos do Vencimento \n");
+        printf("4 - Cadastrar Destino \n");
+        printf("5 - Listar Destinos \n");
         printf("0 - Sair \n");        
         printf(" -------------------------------------------------- \n");
         scanf("%d", &opcao);
@@ -136,6 +213,12 @@ int main() {
             case 3:
                 produtoProximoVencimento();
                 break;
+            case 4:
+                cadastrarDestino();
+                break;
+            case 5:
+                listarDestino();
+                break;                
             case 0:
                 printf("Saindo do sistema.\n");
                 break;
